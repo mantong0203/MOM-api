@@ -1,0 +1,4 @@
+ALTER TABLE mom_agendas
+  DROP COLUMN IF EXISTS user_id;
+
+DROP TABLE IF EXISTS mom_users;
