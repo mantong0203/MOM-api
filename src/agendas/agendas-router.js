@@ -2,6 +2,7 @@ const express = require('express')
 const AgendasService = require('./agendas-service')
 const { requireAuth } = require('../middleware/jwt-auth')
 const agendasRouter = express.Router()
+const jsonBodyParser = express.json()
 
 agendasRouter
   .route('/')
@@ -12,6 +13,29 @@ agendasRouter
       })
       .catch(next)
   })
+  .post(requireAuth, jsonBodyParser, (req, res, next) => {
+    const { agenda_id, title, content} = req.body;
+    const newAgenda = { agenda_id, title, content};
+
+    for (const [key, value] of Object.entries(newAgenda))
+      if (value === null)
+        return res.status(400).json({
+          error: `Missing '${key}' in request body`
+        }); 
+    newAgenda.user_id = req.user.id;    
+    
+    AgendasService.insertAgenda(
+      req.app.get('db'),
+      newAgenda
+    )
+      .then(agenda => {
+        res
+          .status(201)
+          .location(path.posix.join(req.originalUrl, `/${agenda.id}`))
+          .json(AgendasService.serializeAgenda(agenda));
+      })
+      .catch(next);
+  })
 
 agendasRouter
   .route('/:agenda_id')
@@ -20,20 +44,6 @@ agendasRouter
   .get((req, res) => {
     res.json(AgendasService.serializeAgenda(res.agenda))
   })
-
-// agendasRouter.route('/:agenda_id/reviews/')
-//   .all(requireAuth)  
-//   .all(checkAgendaExists)
-//   .get((req, res, next) => {
-//     AgendasService.getReviewsForAgenda(
-//       req.app.get('db'),
-//       req.params.agenda_id
-//     )
-//       .then(reviews => {
-//         res.json(AgendasService.serializeAgendaReviews(reviews))
-//       })
-//       .catch(next)
-//   })
 
 /* async/await syntax for promises */
 async function checkAgendaExists(req, res, next) {

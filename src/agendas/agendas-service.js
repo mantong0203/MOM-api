@@ -4,26 +4,26 @@ const Treeize = require('treeize')
 const AgendasService = {
   getAllAgendas(db) {
     return db
-      .from('mom_agendas AS thg')
+      .from('mom_agendas AS agend')
       .select(
-        'thg.id',
-        'thg.title',
-        'thg.date_created',
-        'thg.content',
+        'agend.id',
+        'agend.title',
+        'agend.date_created',
+        'agend.content',
         
         ...userFields,
       )
       .leftJoin(
         'mom_users AS usr',
-        'thg.user_id',
+        'agend.user_id',
         'usr.id',
       )
-      .groupBy('thg.id', 'usr.id')
+      .groupBy('agend.id', 'usr.id')
   },
 
   getById(db, id) {
     return AgendasService.getAllAgendas(db)
-      .where('thg.id', id)
+      .where('agend.id', id)
       .first()
   },
 
@@ -42,6 +42,7 @@ const AgendasService = {
 
     return {
       id: agendaData.id,
+      agenda_id: agendaData.agenda_id,
       title: xss(agendaData.title),
       content: xss(agendaData.content),
       date_created: agendaData.date_created,
