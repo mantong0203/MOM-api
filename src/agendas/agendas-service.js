@@ -27,7 +27,16 @@ const AgendasService = {
       .first()
   },
 
-
+  insertAgenda(db, newAgenda) {
+    return db
+      .insert(newAgenda)
+      .into('mom_agendas')
+      .returning('*')
+      .then(([agenda]) => agenda)
+      .then(agenda =>
+        AgendasService.getById(db, agenda.id)
+      )
+  },
   serializeAgendas(agendas) {
     return agendas.map(this.serializeAgenda)
   },
@@ -42,13 +51,13 @@ const AgendasService = {
 
     return {
       id: agendaData.id,
-      agenda_id: agendaData.agenda_id,
+      
       title: xss(agendaData.title),
       content: xss(agendaData.content),
       date_created: agendaData.date_created,
       user: agendaData.user || {},
-      //number_of_reviews: Number(agendaData.number_of_reviews) || 0,
-      //average_review_rating: Math.round(agendaData.average_review_rating) || 0,
+      //number_of_agendas: Number(agendaData.number_of_agendas) || 0,
+      //average_agenda_rating: Math.round(agendaData.average_agenda_rating) || 0,
     }
   },
 

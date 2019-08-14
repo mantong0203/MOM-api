@@ -1,21 +1,22 @@
-const express = require('express')
-const AgendasService = require('./agendas-service')
-const { requireAuth } = require('../middleware/jwt-auth')
-const agendasRouter = express.Router()
-const jsonBodyParser = express.json()
+const express = require('express');
+const path = require('path');
+const AgendasService = require('./agendas-service');
+const { requireAuth } = require('../middleware/jwt-auth');
+const agendasRouter = express.Router();
+const jsonBodyParser = express.json();
 
 agendasRouter
   .route('/')
   .get((req, res, next) => {
     AgendasService.getAllAgendas(req.app.get('db'))
       .then(agendas => {
-        res.json(AgendasService.serializeAgendas(agendas))
+        res.json(AgendasService.serializeAgendas(agendas));
       })
-      .catch(next)
+      .catch(next);
   })
   .post(requireAuth, jsonBodyParser, (req, res, next) => {
-    const { agenda_id, title, content} = req.body;
-    const newAgenda = { agenda_id, title, content};
+    const { title, content} = req.body;
+    const newAgenda = { title, content};
 
     for (const [key, value] of Object.entries(newAgenda))
       if (value === null)
@@ -35,34 +36,34 @@ agendasRouter
           .json(AgendasService.serializeAgenda(agenda));
       })
       .catch(next);
-  })
+  });
 
-agendasRouter
-  .route('/:agenda_id')
-  .all(requireAuth)
-  .all(checkAgendaExists)
-  .get((req, res) => {
-    res.json(AgendasService.serializeAgenda(res.agenda))
-  })
+// agendasRouter
+//   .route('/:agenda_id')
+//   .all(requireAuth)
+//   //.all(checkAgendaExists)
+//   .get((req, res) => {
+//     res.json(AgendasService.serializeAgenda(res.agenda));
+//   });
 
 /* async/await syntax for promises */
-async function checkAgendaExists(req, res, next) {
-  try {
-    const agenda = await AgendasService.getById(
-      req.app.get('db'),
-      req.params.agenda_id
-    )
+// async function checkAgendaExists(req, res, next) {
+//   try {
+//     const agenda = await AgendasService.getById(
+//       req.app.get('db'),
+//       req.params.agenda_id
+//     )
 
-    if (!agenda)
-      return res.status(404).json({
-        error: `Agenda doesn't exist`
-      })
+//     if (!agenda)
+//       return res.status(404).json({
+//         error: `Agenda doesn't exist`
+//       })
 
-    res.agenda = agenda
-    next()
-  } catch (error) {
-    next(error)
-  }
-}
+//     res.agenda = agenda
+//     next()
+//   } catch (error) {
+//     next(error)
+//   }
+// }
 
-module.exports = agendasRouter
+module.exports = agendasRouter;
