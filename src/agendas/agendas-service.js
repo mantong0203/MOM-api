@@ -1,29 +1,36 @@
 const xss = require('xss')
-const Treeize = require('treeize')
 
 const AgendasService = {
-  getAllAgendas(db) {
+  getById(db, id) {
     return db
-      .from('mom_agendas AS agend')
+      .from('mom_agendas AS comm')
       .select(
-        'agend.id',
-        'agend.title',
-        'agend.date_created',
-        'agend.content',
-        
-        ...userFields,
+        'comm.id',
+        'comm.title',
+        'comm.date_created',
+        'comm.content',
+        db.raw(
+          `json_strip_nulls(
+            row_to_json(
+              (SELECT tmp FROM (
+                SELECT
+                  usr.id,
+                  usr.user_name,
+                  usr.full_name,
+                  usr.nickname,
+                  usr.date_created,
+                  usr.date_modified
+              ) tmp)
+            )
+          ) AS "user"`
+        )
       )
       .leftJoin(
         'mom_users AS usr',
-        'agend.user_id',
+        'comm.user_id',
         'usr.id',
       )
-      .groupBy('agend.id', 'usr.id')
-  },
-
-  getById(db, id) {
-    return AgendasService.getAllAgendas(db)
-      .where('agend.id', id)
+      .where('comm.id', id)
       .first()
   },
 
@@ -37,39 +44,24 @@ const AgendasService = {
         AgendasService.getById(db, agenda.id)
       )
   },
-  serializeAgendas(agendas) {
-    return agendas.map(this.serializeAgenda)
-  },
 
   serializeAgenda(agenda) {
-    const agendaTree = new Treeize()
-
-    // Some light hackiness to allow for the fact that `treeize`
-    // only accepts arrays of objects, and we want to use a single
-    // object.
-    const agendaData = agendaTree.grow([ agenda ]).getData()[0]
-
+    const { user } = agenda
     return {
-      id: agendaData.id,
-      
-      title: xss(agendaData.title),
-      content: xss(agendaData.content),
-      date_created: agendaData.date_created,
-      user: agendaData.user || {},
-      //number_of_agendas: Number(agendaData.number_of_agendas) || 0,
-      //average_agenda_rating: Math.round(agendaData.average_agenda_rating) || 0,
+      id: agenda.id,
+      title: xss(agenda.title),
+      content: agenda.content,
+      date_created: new Date(agenda.date_created),
+      user: {
+        id: user.id,
+        user_name: user.user_name,
+        full_name: user.full_name,
+        nickname: user.nickname,
+        date_created: new Date(user.date_created),
+        date_modified: new Date(user.date_modified) || null
+      },
     }
-  },
-
+  }
 }
-
-const userFields = [
-  'usr.id AS user:id',
-  'usr.user_name AS user:user_name',
-  'usr.full_name AS user:full_name',
-  'usr.nickname AS user:nickname',
-  'usr.date_created AS user:date_created',
-  'usr.date_modified AS user:date_modified',
-]
 
 module.exports = AgendasService
