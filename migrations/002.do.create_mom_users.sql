@@ -12,3 +12,8 @@ ALTER TABLE mom_agendas
   ADD COLUMN
     user_id INTEGER REFERENCES mom_users(id)
     ON DELETE SET NULL;
+
+ALTER TABLE mom_agendas
+    ADD COLUMN
+        claim_user INTEGER REFERENCES mom_users(id)
+        ON DELETE SET NULL;

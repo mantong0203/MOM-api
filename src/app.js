@@ -16,18 +16,18 @@ app.use(morgan((NODE_ENV === 'production') ? 'tiny' : 'common', {
 app.use(cors());
 app.use(helmet());
 
-app.use('/api/agendas', agendasRouter);
-app.use('/api/auth', authRouter);
-app.use('/api/users', usersRouter);
 
-app.get('/', (req,res) => {
-  res.send('Hello, world!');
-});
+app.use('/api/agendas', agendasRouter);
+app.use('/api/users', usersRouter);
+app.use('/api/auth', authRouter);
+
+
+
 
 app.use(function errorHandler(error, req, res, next) {
   let response;
   if (NODE_ENV === 'production') {
-    console.error(error);
+    //console.error(error);
     response = { error: 'Server error' };
   } else {
     console.error(error);
