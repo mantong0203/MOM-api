@@ -4,4 +4,5 @@ ALTER TABLE mom_agendas
 ALTER TABLE mom_agendas
     DROP COLUMN IF EXISTS claim_user;
 
-DROP TABLE IF EXISTS mom_users;
+DROP TABLE IF EXISTS users;
+DROP TYPE IF EXISTS users;

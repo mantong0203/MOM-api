@@ -6,8 +6,8 @@ const AgendaService = {
   },
   getById(knex, id) {
     return knex
+      .select('*')  
       .from('mom_agendas')
-      .select('*')
       .where('id', id)
       .first();
   },

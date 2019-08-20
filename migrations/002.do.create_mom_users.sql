@@ -1,19 +1,29 @@
-CREATE TABLE mom_users (
+CREATE TABLE users (
   id SERIAL PRIMARY KEY,
-  user_name TEXT NOT NULL UNIQUE,
   full_name TEXT NOT NULL,
+  user_name TEXT NOT NULL UNIQUE,
+  
   password TEXT NOT NULL,
-  nickname TEXT,
+  
   date_created TIMESTAMP NOT NULL DEFAULT now(),
   date_modified TIMESTAMP
+);
+DROP TYPE IF EXISTS category;
+
+CREATE TYPE category AS ENUM (
+    'School',
+    'Shopping',
+    'Activities',
+    'Family',
+    'Afterschool'
 );
 
 ALTER TABLE mom_agendas
   ADD COLUMN
-    user_id INTEGER REFERENCES mom_users(id)
+    user_id INTEGER REFERENCES users(id)
     ON DELETE SET NULL;
 
 ALTER TABLE mom_agendas
     ADD COLUMN
-        claim_user INTEGER REFERENCES mom_users(id)
+        claim_user INTEGER REFERENCES users(id)
         ON DELETE SET NULL;

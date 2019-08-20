@@ -1,4 +1,4 @@
 TRUNCATE
   mom_agendas,
-  mom_users
+  users
   RESTART IDENTITY CASCADE;
